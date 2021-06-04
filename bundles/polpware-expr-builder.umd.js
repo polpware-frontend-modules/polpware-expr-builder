@@ -114,6 +114,36 @@
                 return exports.OperatorEnum.Undefined;
         }
     }
+    /**
+     * Translates the given into a JavaSrcipt type.
+     * @param ty
+     */
+    function translateStringToType(ty) {
+        switch (ty) {
+            case 'tyBool':
+                return feUtilities.tyBool;
+            case 'tyNull':
+                return feUtilities.tyNull;
+            case 'tyUndefined':
+                return feUtilities.tyUndefined;
+            case 'tyNumber':
+                return feUtilities.tyNumber;
+            case 'tyString':
+                return feUtilities.tyString;
+            case 'tyDate':
+                return feUtilities.tyDate;
+            case 'tySymbol':
+                return feUtilities.tySymbol;
+            case 'tyObject':
+                return feUtilities.tyObject;
+            case 'tyArray':
+                return feUtilities.tyArray;
+            case 'tyFunction':
+                return feUtilities.tyFunction;
+            default:
+                return feUtilities.tyString;
+        }
+    }
 
     /**
      * Translates into a string format for C#.
@@ -324,6 +354,7 @@
     exports.getTypeSafeValueRep = getTypeSafeValueRep;
     exports.interpretOperator = interpretOperator;
     exports.translateStringToOperator = translateStringToOperator;
+    exports.translateStringToType = translateStringToType;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

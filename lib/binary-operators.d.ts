@@ -32,3 +32,8 @@ export declare const OperatorOptions4Text: {
  * @param op
  */
 export declare function translateStringToOperator(op: string): OperatorEnum;
+/**
+ * Translates the given into a JavaSrcipt type.
+ * @param ty
+ */
+export declare function translateStringToType(ty: string): import("@polpware/fe-utilities").ITypeDef;

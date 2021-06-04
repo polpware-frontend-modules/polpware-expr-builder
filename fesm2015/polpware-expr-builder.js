@@ -1,4 +1,4 @@
-import { safeParseInt, tyString, tyBool, safeParseBool, tyNumber, safeParseFloat, tyDate, safeParseString } from '@polpware/fe-utilities';
+import { tyString, tyFunction, tyArray, tyObject, tySymbol, tyDate, tyNumber, tyUndefined, tyNull, tyBool, safeParseInt, safeParseBool, safeParseFloat, safeParseString } from '@polpware/fe-utilities';
 
 var OperatorEnum;
 (function (OperatorEnum) {
@@ -109,6 +109,36 @@ function translateStringToOperator(op) {
             return OperatorEnum.EndWith;
         default:
             return OperatorEnum.Undefined;
+    }
+}
+/**
+ * Translates the given into a JavaSrcipt type.
+ * @param ty
+ */
+function translateStringToType(ty) {
+    switch (ty) {
+        case 'tyBool':
+            return tyBool;
+        case 'tyNull':
+            return tyNull;
+        case 'tyUndefined':
+            return tyUndefined;
+        case 'tyNumber':
+            return tyNumber;
+        case 'tyString':
+            return tyString;
+        case 'tyDate':
+            return tyDate;
+        case 'tySymbol':
+            return tySymbol;
+        case 'tyObject':
+            return tyObject;
+        case 'tyArray':
+            return tyArray;
+        case 'tyFunction':
+            return tyFunction;
+        default:
+            return tyString;
     }
 }
 
@@ -320,5 +350,5 @@ function evaluateAssertion(value, op, ty, expected) {
  * Generated bundle index. Do not edit.
  */
 
-export { OperatorEnum, OperatorOptions4Bool, OperatorOptions4Number, OperatorOptions4Text, buildTypeConvertor, evaluateAssertion, getTypeSafeValue, getTypeSafeValueRep, interpretOperator, translateStringToOperator };
+export { OperatorEnum, OperatorOptions4Bool, OperatorOptions4Number, OperatorOptions4Text, buildTypeConvertor, evaluateAssertion, getTypeSafeValue, getTypeSafeValueRep, interpretOperator, translateStringToOperator, translateStringToType };
 //# sourceMappingURL=polpware-expr-builder.js.map
