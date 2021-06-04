@@ -77,6 +77,46 @@ var OperatorOptions4Text = [
         value: OperatorEnum.GreaterThanEqual
     }
 ];
+/**
+ * Translates the given string into a operator value.
+ * Note that this method is expected to be invoked when
+ * parsing a dataflow or report.
+ * Thus, the input value is well-defined and must be
+ * one of the given value.
+ * @param op
+ */
+function translateStringToOperator(op) {
+    switch (op) {
+        case '<':
+            return OperatorEnum.LessThan;
+        case '<=':
+            return OperatorEnum.LessThanEqual;
+        case '==':
+            return OperatorEnum.Equal;
+        case '!=':
+            return OperatorEnum.NotEqual;
+        case '>':
+            return OperatorEnum.GreaterThan;
+        case '>=':
+            return OperatorEnum.GreaterThanEqual;
+        case 'Contains':
+            return OperatorEnum.Contain;
+        case 'DoesNotContain':
+            return OperatorEnum.NotContain;
+        case 'StartsWith':
+            return OperatorEnum.StartWith;
+        case 'EndsWith':
+            return OperatorEnum.EndWith;
+        default:
+            return OperatorEnum.Undefined;
+    }
+}
+
+/**
+ * Translates into a string format for C#.
+ * @param op
+ * @param ty
+ */
 function interpretOperator(op, ty) {
     op = safeParseInt(op);
     var s = '';
@@ -148,40 +188,6 @@ function interpretOperator(op, ty) {
     return s;
 }
 /**
- * Translates the given string into a operator value.
- * Note that this method is expected to be invoked when
- * parsing a dataflow or report.
- * Thus, the input value is well-defined and must be
- * one of the given value.
- * @param op
- */
-function translateStringToOperator(op) {
-    switch (op) {
-        case '<':
-            return OperatorEnum.LessThan;
-        case '<=':
-            return OperatorEnum.LessThanEqual;
-        case '==':
-            return OperatorEnum.Equal;
-        case '!=':
-            return OperatorEnum.NotEqual;
-        case '>':
-            return OperatorEnum.GreaterThan;
-        case '>=':
-            return OperatorEnum.GreaterThanEqual;
-        case 'Contains':
-            return OperatorEnum.Contain;
-        case 'DoesNotContain':
-            return OperatorEnum.NotContain;
-        case 'StartsWith':
-            return OperatorEnum.StartWith;
-        case 'EndsWith':
-            return OperatorEnum.EndWith;
-        default:
-            return OperatorEnum.Undefined;
-    }
-}
-/**
  * Computes the representation for the given value with the given type.
  * The given value is a known value, and it can be of one of many types.
  * Typically, the value is directly obtained from the user input in Form.
@@ -238,6 +244,74 @@ function buildTypeConvertor(varName, varType) {
     return varName;
 }
 
+/**
+ * Computes the type safe value in Javascript.
+ * @param value
+ * @param valueType
+ */
+function getTypeSafeValue(value, valueType) {
+    if (valueType == tyBool) {
+        value = safeParseBool(value);
+    }
+    else if (valueType == tyNumber) {
+        value = safeParseFloat(value);
+    }
+    else if (valueType == tyDate) {
+        value = safeParseString(value);
+        value = Date.parse(value);
+    }
+    else { // string 
+        value = safeParseString(value);
+    }
+    return value;
+}
+/**
+ * Evalutes the given assertion if it holds.
+ * @param value
+ * @param op
+ * @param ty
+ * @param expected
+ */
+function evaluateAssertion(value, op, ty, expected) {
+    op = safeParseInt(op);
+    var s = false;
+    switch (op) {
+        case OperatorEnum.LessThan:
+            s = getTypeSafeValue(value, ty) < getTypeSafeValue(expected, ty);
+            break;
+        case OperatorEnum.LessThanEqual:
+            s = getTypeSafeValue(value, ty) <= getTypeSafeValue(expected, ty);
+            break;
+        case OperatorEnum.Equal:
+            s = getTypeSafeValue(value, ty) == getTypeSafeValue(expected, ty);
+            break;
+        case OperatorEnum.NotEqual:
+            s = getTypeSafeValue(value, ty) != getTypeSafeValue(expected, ty);
+            break;
+        case OperatorEnum.GreaterThan:
+            s = getTypeSafeValue(value, ty) > getTypeSafeValue(expected, ty);
+            break;
+        case OperatorEnum.GreaterThanEqual:
+            s = getTypeSafeValue(value, ty) >= getTypeSafeValue(expected, ty);
+            break;
+        case OperatorEnum.Contain:
+            s = getTypeSafeValue(value, ty).indexOf(getTypeSafeValue(expected, ty)) != -1;
+            break;
+        case OperatorEnum.NotContain:
+            s = getTypeSafeValue(value, ty).indexOf(getTypeSafeValue(expected, ty)) == -1;
+            break;
+        case OperatorEnum.StartWith:
+            s = getTypeSafeValue(value, ty).startsWith(getTypeSafeValue(expected, ty));
+            break;
+        case OperatorEnum.EndWith:
+            s = getTypeSafeValue(value, ty).endsWith(getTypeSafeValue(expected, ty));
+            break;
+        default:
+            break;
+    }
+    return s;
+}
+
 /*
  * Public API Surface of expr-builder
  */
@@ -246,5 +320,5 @@ function buildTypeConvertor(varName, varType) {
  * Generated bundle index. Do not edit.
  */
 
-export { OperatorEnum, OperatorOptions4Bool, OperatorOptions4Number, OperatorOptions4Text, buildTypeConvertor, getTypeSafeValueRep, interpretOperator, translateStringToOperator };
+export { OperatorEnum, OperatorOptions4Bool, OperatorOptions4Number, OperatorOptions4Text, buildTypeConvertor, evaluateAssertion, getTypeSafeValue, getTypeSafeValueRep, interpretOperator, translateStringToOperator };
 //# sourceMappingURL=polpware-expr-builder.js.map

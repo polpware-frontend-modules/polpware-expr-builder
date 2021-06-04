@@ -80,6 +80,46 @@
             value: exports.OperatorEnum.GreaterThanEqual
         }
     ];
+    /**
+     * Translates the given string into a operator value.
+     * Note that this method is expected to be invoked when
+     * parsing a dataflow or report.
+     * Thus, the input value is well-defined and must be
+     * one of the given value.
+     * @param op
+     */
+    function translateStringToOperator(op) {
+        switch (op) {
+            case '<':
+                return exports.OperatorEnum.LessThan;
+            case '<=':
+                return exports.OperatorEnum.LessThanEqual;
+            case '==':
+                return exports.OperatorEnum.Equal;
+            case '!=':
+                return exports.OperatorEnum.NotEqual;
+            case '>':
+                return exports.OperatorEnum.GreaterThan;
+            case '>=':
+                return exports.OperatorEnum.GreaterThanEqual;
+            case 'Contains':
+                return exports.OperatorEnum.Contain;
+            case 'DoesNotContain':
+                return exports.OperatorEnum.NotContain;
+            case 'StartsWith':
+                return exports.OperatorEnum.StartWith;
+            case 'EndsWith':
+                return exports.OperatorEnum.EndWith;
+            default:
+                return exports.OperatorEnum.Undefined;
+        }
+    }
+
+    /**
+     * Translates into a string format for C#.
+     * @param op
+     * @param ty
+     */
     function interpretOperator(op, ty) {
         op = feUtilities.safeParseInt(op);
         var s = '';
@@ -151,40 +191,6 @@
         return s;
     }
     /**
-     * Translates the given string into a operator value.
-     * Note that this method is expected to be invoked when
-     * parsing a dataflow or report.
-     * Thus, the input value is well-defined and must be
-     * one of the given value.
-     * @param op
-     */
-    function translateStringToOperator(op) {
-        switch (op) {
-            case '<':
-                return exports.OperatorEnum.LessThan;
-            case '<=':
-                return exports.OperatorEnum.LessThanEqual;
-            case '==':
-                return exports.OperatorEnum.Equal;
-            case '!=':
-                return exports.OperatorEnum.NotEqual;
-            case '>':
-                return exports.OperatorEnum.GreaterThan;
-            case '>=':
-                return exports.OperatorEnum.GreaterThanEqual;
-            case 'Contains':
-                return exports.OperatorEnum.Contain;
-            case 'DoesNotContain':
-                return exports.OperatorEnum.NotContain;
-            case 'StartsWith':
-                return exports.OperatorEnum.StartWith;
-            case 'EndsWith':
-                return exports.OperatorEnum.EndWith;
-            default:
-                return exports.OperatorEnum.Undefined;
-        }
-    }
-    /**
      * Computes the representation for the given value with the given type.
      * The given value is a known value, and it can be of one of many types.
      * Typically, the value is directly obtained from the user input in Form.
@@ -241,10 +247,80 @@
         return varName;
     }
 
+    /**
+     * Computes the type safe value in Javascript.
+     * @param value
+     * @param valueType
+     */
+    function getTypeSafeValue(value, valueType) {
+        if (valueType == feUtilities.tyBool) {
+            value = feUtilities.safeParseBool(value);
+        }
+        else if (valueType == feUtilities.tyNumber) {
+            value = feUtilities.safeParseFloat(value);
+        }
+        else if (valueType == feUtilities.tyDate) {
+            value = feUtilities.safeParseString(value);
+            value = Date.parse(value);
+        }
+        else { // string 
+            value = feUtilities.safeParseString(value);
+        }
+        return value;
+    }
+    /**
+     * Evalutes the given assertion if it holds.
+     * @param value
+     * @param op
+     * @param ty
+     * @param expected
+     */
+    function evaluateAssertion(value, op, ty, expected) {
+        op = feUtilities.safeParseInt(op);
+        var s = false;
+        switch (op) {
+            case exports.OperatorEnum.LessThan:
+                s = getTypeSafeValue(value, ty) < getTypeSafeValue(expected, ty);
+                break;
+            case exports.OperatorEnum.LessThanEqual:
+                s = getTypeSafeValue(value, ty) <= getTypeSafeValue(expected, ty);
+                break;
+            case exports.OperatorEnum.Equal:
+                s = getTypeSafeValue(value, ty) == getTypeSafeValue(expected, ty);
+                break;
+            case exports.OperatorEnum.NotEqual:
+                s = getTypeSafeValue(value, ty) != getTypeSafeValue(expected, ty);
+                break;
+            case exports.OperatorEnum.GreaterThan:
+                s = getTypeSafeValue(value, ty) > getTypeSafeValue(expected, ty);
+                break;
+            case exports.OperatorEnum.GreaterThanEqual:
+                s = getTypeSafeValue(value, ty) >= getTypeSafeValue(expected, ty);
+                break;
+            case exports.OperatorEnum.Contain:
+                s = getTypeSafeValue(value, ty).indexOf(getTypeSafeValue(expected, ty)) != -1;
+                break;
+            case exports.OperatorEnum.NotContain:
+                s = getTypeSafeValue(value, ty).indexOf(getTypeSafeValue(expected, ty)) == -1;
+                break;
+            case exports.OperatorEnum.StartWith:
+                s = getTypeSafeValue(value, ty).startsWith(getTypeSafeValue(expected, ty));
+                break;
+            case exports.OperatorEnum.EndWith:
+                s = getTypeSafeValue(value, ty).endsWith(getTypeSafeValue(expected, ty));
+                break;
+            default:
+                break;
+        }
+        return s;
+    }
+
     exports.OperatorOptions4Bool = OperatorOptions4Bool;
     exports.OperatorOptions4Number = OperatorOptions4Number;
     exports.OperatorOptions4Text = OperatorOptions4Text;
     exports.buildTypeConvertor = buildTypeConvertor;
+    exports.evaluateAssertion = evaluateAssertion;
+    exports.getTypeSafeValue = getTypeSafeValue;
     exports.getTypeSafeValueRep = getTypeSafeValueRep;
     exports.interpretOperator = interpretOperator;
     exports.translateStringToOperator = translateStringToOperator;
